@@ -1,26 +1,24 @@
 <html>
-	<head>
-		<meta charset="UTF-8" />
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-		/>
-	</head>
 
-	<body class="main-background">
-		<div id="app" class="ui container">
-			<h1 class="main-title">Find a friend</h1>
+<head>
+	<meta charset="UTF-8" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+</head>
 
-			<user-profile-card class="user-profile centered"></user-profile-card>
+<body class="main-background">
+	<div id="app" class="ui container">
+		<h1 class="main-title">Find a friend</h1>
 
-			<footer>
-				Made with &#129299; &#129327; &#128525; by &nbsp;
-				<span class="signature">nicahdemarco</span>
-			</footer>
-		</div>
+		<user-profile-card class="user-profile centered"></user-profile-card>
 
-		<script type="text/x-template" id="user-profile-card-template">
-			<div class="user-profile">
+		<footer>
+			Made with &#129299; &#129327; &#128525; by &nbsp;
+			<span class="signature">nicahdemarco</span>
+		</footer>
+	</div>
+
+	<script type="text/x-template" id="user-profile-card-template">
+		<div class="user-profile">
 				<div class="ui icon input user-profile-search-bar">
 					<input
 						v-model.trim="username"
@@ -68,196 +66,212 @@
 			</div>
 		</script>
 
-		<!-- Import Vue.js and axios -->
-		<script src="https://unpkg.com/vue"></script>
-		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<!-- Import Vue.js and axios -->
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 
-		<script>
-			Vue.component("user-profile-card", {
-				template: "#user-profile-card-template",
-				data() {
-					return {
-						userData: {
-							avatar_url: "./img/octocat_github.gif",
-							name: "Octocat",
-							location: "Github.com",
-							created_at: "Not sure",
-							bio: "A long time ago in a galaxy far, far away...",
-							followers: 0,
-							public_repos: 0,
-						},
-						username: null,
-						showError: false,
-						errorMsg: "",
-						searchBarIcon: "github",
-					};
-				},
-
-				methods: {
-					searchProfile(username) {
-						axios
-							.get(`https://api.github.com/users/${this.username}`)
-							.then((response) => {
-								this.showError = false;
-								this.userData = response.data;
-							})
-							.catch((e) => {
-								this.showError = true;
-								this.userData.avatar_url = "./img/notFound.jpg";
-								this.e = errorMsg;
-								console.log(error);
-							});
+	<script>
+		Vue.component("user-profile-card", {
+			template: "#user-profile-card-template",
+			data() {
+				return {
+					userData: {
+						avatar_url: "./img/octocat_github.gif",
+						name: "Octocat",
+						location: "Github.com",
+						created_at: "Not sure",
+						bio: "A long time ago in a galaxy far, far away...",
+						followers: 0,
+						public_repos: 0,
 					},
-					clearInput() {
-						this.username = null;
-					},
+					username: null,
+					showError: false,
+					errorMsg: "",
+					searchBarIcon: "github",
+				};
+			},
+
+			methods: {
+				searchProfile(username) {
+					axios
+						.get(`https://api.github.com/users/${this.username}`)
+						.then((response) => {
+							this.showError = false;
+							this.userData = response.data;
+						})
+						.catch((e) => {
+							this.showError = true;
+							this.userData.avatar_url = "./img/notFound.jpg";
+							this.e = errorMsg;
+							console.log(error);
+						});
 				},
-
-				watch: {
-					username: function () {
-						if (this.username !== null) {
-							this.searchBarIcon = "times";
-						} else {
-							this.searchBarIcon = "github";
-						}
-					},
+				clearInput() {
+					this.username = null;
 				},
+			},
 
-				computed: {
-					formatDate: function () {
-						formatedDate =  this.userData.created_at;
-						if (this.userData !== null) {
-							return formatedDate.slice(0, 10).split("-").reverse().join("-");
-						} 
-					},
+			watch: {
+				username: function () {
+					if (this.username !== null) {
+						this.searchBarIcon = "times";
+					} else {
+						this.searchBarIcon = "github";
+					}
 				},
-			});
+			},
 
-			new Vue({
-				el: "#app",
-			});
-		</script>
+			computed: {
+				formatDate: function () {
+					formatedDate = this.userData.created_at;
+					if (this.userData !== null) {
+						return formatedDate.slice(0, 10).split("-").reverse().join("-");
+					}
+				},
+			},
+		});
 
-		<style>
-			.main-background {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				height: 100%;
-				background-color: #000000; /* fallback for old browsers */
-				background: -webkit-linear-gradient(
-					to top,
+		new Vue({
+			el: "#app",
+		});
+	</script>
+
+	<style>
+		.main-background {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			background-color: #000000;
+			/* fallback for old browsers */
+			background: -webkit-linear-gradient(to top,
 					#434343,
-					#000000
-				); /* Chrome 10-25, Safari 5.1-6 */
-				background: linear-gradient(
-					to top,
+					#000000);
+			/* Chrome 10-25, Safari 5.1-6 */
+			background: linear-gradient(to top,
 					#434343,
-					#000000
-				); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-			}
-			.main-title {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				font-size: 48px;
-				color: rgb(255, 255, 255);
-			}
-			.user-profile {
-				display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-				position: relative;
-			}
-			.user-profile-search-bar {
-				width: 290px;
-			}
-			.user-profile-avatar :nth-child(1) {
-				height: 290px !important;
-			}
-			.error-msg {
-				color: white;
-				background-color: rgb(233, 5, 5);
-				text-align: center;
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-				padding: 1% 0;
-			}
-			footer {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				margin: 2% 0;
-				color: white;
-			}
-			.signature {
-				-webkit-background-clip: text !important;
-				-webkit-text-fill-color: transparent;
-				font-weight: bolder;
-				background: linear-gradient(
-					100deg,
+					#000000);
+			/* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+		}
+
+		.main-title {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 48px;
+			color: rgb(255, 255, 255);
+		}
+
+		.user-profile {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+		}
+
+		.user-profile-search-bar {
+			width: 290px;
+		}
+
+		.user-profile-avatar :nth-child(1) {
+			height: 290px !important;
+		}
+
+		.error-msg {
+			color: white;
+			background-color: rgb(233, 5, 5);
+			text-align: center;
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			padding: 1% 0;
+		}
+
+		footer {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin: 2% 0;
+			color: white;
+		}
+
+		.signature {
+			-webkit-background-clip: text !important;
+			-webkit-text-fill-color: transparent;
+			font-weight: bolder;
+			background: linear-gradient(100deg,
 					#e81d1d,
 					#e3e81d,
 					#1de840,
 					#1ddde8,
 					#2b1de8,
-					#dd00f3
-				);
+					#dd00f3);
 
-				background-size: 800% 800%;
+			background-size: 800% 800%;
 
-				-webkit-animation: gradientFlow 18s ease-in-out infinite;
-				-z-animation: gradientFlow 18s ease-in-out infinite;
-				-o-animation: gradientFlow 18s ease-in-out infinite;
-				animation: gradientFlow 18s ease-in-out infinite;
+			-webkit-animation: gradientFlow 18s ease-in-out infinite;
+			-z-animation: gradientFlow 18s ease-in-out infinite;
+			-o-animation: gradientFlow 18s ease-in-out infinite;
+			animation: gradientFlow 18s ease-in-out infinite;
+		}
+
+		@-webkit-keyframes gradientFlow {
+			0% {
+				background-position: 0% 82%;
 			}
 
-			@-webkit-keyframes gradientFlow {
-				0% {
-					background-position: 0% 82%;
-				}
-				50% {
-					background-position: 100% 19%;
-				}
-				100% {
-					background-position: 0% 82%;
-				}
+			50% {
+				background-position: 100% 19%;
 			}
-			@-moz-keyframes gradientFlow {
-				0% {
-					background-position: 0% 82%;
-				}
-				50% {
-					background-position: 100% 19%;
-				}
-				100% {
-					background-position: 0% 82%;
-				}
+
+			100% {
+				background-position: 0% 82%;
 			}
-			@-o-keyframes gradientFlow {
-				0% {
-					background-position: 0% 82%;
-				}
-				50% {
-					background-position: 100% 19%;
-				}
-				100% {
-					background-position: 0% 82%;
-				}
+		}
+
+		@-moz-keyframes gradientFlow {
+			0% {
+				background-position: 0% 82%;
 			}
-			@keyframes gradientFlow {
-				0% {
-					background-position: 0% 82%;
-				}
-				50% {
-					background-position: 100% 19%;
-				}
-				100% {
-					background-position: 0% 82%;
-				}
+
+			50% {
+				background-position: 100% 19%;
 			}
-		</style>
-	</body>
+
+			100% {
+				background-position: 0% 82%;
+			}
+		}
+
+		@-o-keyframes gradientFlow {
+			0% {
+				background-position: 0% 82%;
+			}
+
+			50% {
+				background-position: 100% 19%;
+			}
+
+			100% {
+				background-position: 0% 82%;
+			}
+		}
+
+		@keyframes gradientFlow {
+			0% {
+				background-position: 0% 82%;
+			}
+
+			50% {
+				background-position: 100% 19%;
+			}
+
+			100% {
+				background-position: 0% 82%;
+			}
+		}
+	</style>
+</body>
+
 </html>
