@@ -35,7 +35,7 @@
 						<img class="" :src= "userData.avatar_url "/>
 						<div class="error-msg" v-show="showError">{{ errorMsg.message === 'Not Found' ?  "LIMIT OF SEARCHS REACHED" :"NOT FOUND, PLEASE SEARCH AGAIN" }}</div>
 					</div>
-					<div class="content">
+					<div class="content card-content">
 						<a
 							class="header"
 							:href="`https://github.com/${username}`"
@@ -99,16 +99,32 @@
 							this.showError = false;
 							this.userData = response.data;
 						})
-						.catch((e) => {
+						.catch((err) => {
 							this.showError = true;
 							this.userData.avatar_url = "./img/notFound.jpg";
-							this.e = errorMsg;
-							console.log(error);
+							this.errorMsg = err;
+							console.log(err);
 						});
 				},
+
 				clearInput() {
-					this.username = null;
+					this.setInitialState();
 				},
+
+				setInitialState() {
+					this.username = null
+					this.showError = false;
+
+					return this.userData = {
+						avatar_url: "./img/octocat_github.gif",
+						name: "Octocat",
+						location: "Github.com",
+						created_at: "Not sure",
+						bio: "A long time ago in a galaxy far, far away...",
+						followers: 0,
+						public_repos: 0,
+					}
+				}
 			},
 
 			watch: {
@@ -178,9 +194,30 @@
 			height: 290px !important;
 		}
 
+		.card-content {
+			height: 155px;
+			overflow: auto;
+		}
+
+		.card-content::-webkit-scrollbar {
+			width: 4px !important;
+		}
+
+		.card-content::-webkit-scrollbar-track {
+			background-color: transparent !important;
+		}
+
+		.card-content::-webkit-scrollbar-thumb {
+			display:none;
+
+		}
+		.card-content::-webkit-scrollbar-thumb:hover {
+			display: inline;
+		}
+
 		.error-msg {
-			color: white;
-			background-color: rgb(233, 5, 5);
+			color: rgb(228, 227, 227);
+			background-color: rgba(199, 7, 7, 0.8);
 			text-align: center;
 			position: absolute;
 			bottom: 0;
@@ -197,6 +234,7 @@
 		}
 
 		.signature {
+			background-clip: text !important;
 			-webkit-background-clip: text !important;
 			-webkit-text-fill-color: transparent;
 			font-weight: bolder;
