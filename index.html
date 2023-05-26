@@ -17,58 +17,75 @@
 		</footer>
 	</div>
 
-	<script type="text/x-template" id="user-profile-card-template">
-		<div class="user-profile">
-				<div class="ui icon input user-profile-search-bar">
-					<input
-						v-model.trim="username"
-						type="text"
-						placeholder="Search dev profile..."
-						@keydown.enter="searchProfile(username)"/>
-						<i
-							:class="`${searchBarIcon} icon link`"
-							@click="clearInput"
-						></i>
+<script type="text/x-template" id="user-profile-card-template">
+	<div class="user-profile">
+		<div class=" flex col ui icon input user-profile-search-bar">
+			<input
+				v-model.trim="term"
+				type="text"
+				placeholder="Search a dev profile..."
+				@keydown.enter="searchUsers(term)"/>
+					<i
+						:class="`${searchBarIcon} icon link`"
+						@click="clearInput"
+					></i>
+		</div>
+
+		<div class='flex users-list-container'
+			v-if="term !== ''">
+			<ul class='users-list'>
+				<!-- TODO:Cambiar a keyup cuando funcione -->
+				<li class="list-item"
+					v-for="(user,idx) in filteredUsers"
+					:key="`user-${idx}`"
+					@click="searchProfile(user)"
+					@keyup="searchProfile(user)"
+				>
+					{{user}}
+				</li>
+			</ul>
+		</div>
+
+		<div class="ui card raised ">
+			<div class="image user-profile-avatar">
+				<img class="" :src= "userData.avatar_url "/>
+				<div class="error-msg" v-show="showError">{{ errorStatus ===  403 ?  "LIMIT OF SEARCHS REACHED, WAIT" :"NOT FOUND, PLEASE SEARCH AGAIN" }}</div>
+			</div>
+			<div class="content card-content">
+				<a
+					class="header"
+					:href="`https://github.com/${username}`"
+					target="_blank"
+				>{{userData.name}}</a>
+				<span>
+					<i class="map marker alternate icon"></i>
+					{{userData.location}}
+				</span>
+				<div class="meta">
+					<span class="date">Joined in: {{ formatDate }}</span>
 				</div>
-				<div class="ui card raised ">
-					<div class="image user-profile-avatar">
-						<img class="" :src= "userData.avatar_url "/>
-						<div class="error-msg" v-show="showError">{{ errorMsg.message === 'Not Found' ?  "LIMIT OF SEARCHS REACHED" :"NOT FOUND, PLEASE SEARCH AGAIN" }}</div>
-					</div>
-					<div class="content card-content">
-						<a
-							class="header"
-							:href="`https://github.com/${username}`"
-							target="_blank"
-						>{{userData.name}}</a>
-						<span>
-							<i class="map marker alternate icon"></i>
-							{{userData.location}}
-						</span>
-						<div class="meta">
-							<span class="date">Joined in: {{ formatDate }}</span>
-						</div>
-						<div class="description">
-							{{userData.bio}}
-						</div>
-					</div>
-					<div class="extra content">
-						<span>
-							<i class="users icon"></i>
-							{{userData.followers}} Friends
-						</span>
-						<span>
-							<i class="github square icon"></i>
-							{{userData.public_repos}} Repos
-						</span>
-					</div>
+				<div class="description">
+					{{userData.bio}}
 				</div>
 			</div>
-		</script>
+			<div class="extra content">
+				<span>
+					<i class="users icon"></i>
+					{{userData.followers}} Friends
+				</span>
+				<span>
+					<i class="github square icon"></i>
+					{{userData.public_repos}} Repos
+				</span>
+			</div>
+		</div>
+	</div>
+</script>
 
 	<!-- Import Vue.js and axios -->
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script> -->
 
 	<script>
 		Vue.component("user-profile-card", {
@@ -84,17 +101,46 @@
 						followers: 0,
 						public_repos: 0,
 					},
+					users:[{}],
+					resultUsers:[],
+					filteredUsers:[],
+					term:"",
 					username: null,
 					showError: false,
-					errorMsg: "",
+					errorMsg: '',
+					errorStatus: null,
 					searchBarIcon: "github",
 				};
 			},
+			mounted(){
 
-			methods: {
-				searchProfile(username) {
 					axios
-						.get(`https://api.github.com/users/${this.username}`)
+						.get(`https://api.github.com/users?since=0/?per_page=100/}`)
+						.then((response) => {
+							this.showError = false;
+							this.users = response.data;
+						})
+						.then(()=>{
+							this.users.map((user)=>{
+								this.resultUsers.push(user.login);
+								// console.log(this.resultUsers);
+							})
+						})
+						.catch((err) => {
+							this.showError = true;
+							this.userData.avatar_url = "./img/notFound.jpg";
+							this.errorMsg = err;
+							this.errorStatus = err.response.status;
+							console.log(err);
+						});
+			},
+			methods: {
+
+				searchProfile(username) {
+					const formattedUserName = username.replace(/\s+/g, '');
+
+					axios
+						.get(`https://api.github.com/users/${formattedUserName}`)
 						.then((response) => {
 							this.showError = false;
 							this.userData = response.data;
@@ -104,7 +150,27 @@
 							this.userData.avatar_url = "./img/notFound.jpg";
 							this.errorMsg = err;
 							console.log(err);
+						})
+						.finally(()=> {
+							this.username = null;
+							this.filteredUsers=[];
+							this.term=''
 						});
+				},
+
+				searchUsers(user){
+
+					this.resultUsers.map((user) =>{
+						if ( 
+							this.term.length> 0 && 
+							user.includes(this.term)) {
+							this.filteredUsers.push(user);
+							// console.log(this.filteredUsers);
+							
+						}
+					})
+
+					return this.filteredUsers
 				},
 
 				clearInput() {
@@ -112,7 +178,7 @@
 				},
 
 				setInitialState() {
-					this.username = null
+					this.term = ''
 					this.showError = false;
 
 					return this.userData = {
@@ -128,8 +194,8 @@
 			},
 
 			watch: {
-				username: function () {
-					if (this.username !== null) {
+				term: function () {
+					if (this.term.length > 0) {
 						this.searchBarIcon = "times";
 					} else {
 						this.searchBarIcon = "github";
@@ -138,6 +204,7 @@
 			},
 
 			computed: {
+
 				formatDate: function () {
 					formatedDate = this.userData.created_at;
 					if (this.userData !== null) {
@@ -153,6 +220,13 @@
 	</script>
 
 	<style>
+/* 
+		.flex{
+			display: flex;
+		}
+		.col {
+			flex-direction: column;
+		} */
 		.main-background {
 			display: flex;
 			justify-content: center;
@@ -188,10 +262,35 @@
 
 		.user-profile-search-bar {
 			width: 290px;
+			position: relative;
 		}
 
 		.user-profile-avatar :nth-child(1) {
 			height: 290px !important;
+		}
+
+		.users-list-container{
+			width: 290px;
+			position: absolute;
+			top: 38px;
+			z-index: 2;
+			background-color: rgba(255, 255, 255, 1);
+			border-bottom-left-radius:4px;
+			border-bottom-right-radius:4px;
+			box-shadow: 1px 5px 5px rgba(0, 0, 0, 0.6);
+		}
+
+		.users-list{
+			width: 100%;
+		}
+
+		.list-item {
+			list-style: none;
+			cursor: pointer;
+		}
+
+		.list-item:hover {
+			color: rgba(158, 18, 18, 0.5);
 		}
 
 		.card-content {
@@ -211,6 +310,7 @@
 			display:none;
 
 		}
+
 		.card-content::-webkit-scrollbar-thumb:hover {
 			display: inline;
 		}
